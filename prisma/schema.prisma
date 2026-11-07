@@ -1,0 +1,52 @@
+// Prepared for future persistence. Run `npx prisma generate` after installing prisma.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String          @id @default(cuid())
+  email     String?         @unique
+  recipes   Recipe[]
+  sessions  CookingSession[]
+  createdAt DateTime        @default(now())
+}
+
+model Recipe {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  sourceUrl       String
+  thumbnailUrl    String
+  category        String
+  preparationTime Int
+  cookingTime     Int
+  totalTime       Int
+  servings        Int
+  difficulty      String
+  equipment       String[]
+  tips            String[]
+  ingredients     Json
+  instructions    Json
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  sessions        CookingSession[]
+  createdAt       DateTime @default(now())
+}
+
+model CookingSession {
+  id                  String   @id @default(cuid())
+  recipeId            String
+  recipe              Recipe   @relation(fields: [recipeId], references: [id])
+  userId              String?
+  user                User?    @relation(fields: [userId], references: [id])
+  currentStep         Int      @default(0)
+  completedSteps      Int[]
+  servings            Int
+  conversationHistory Json
+  startedAt           DateTime @default(now())
+}
